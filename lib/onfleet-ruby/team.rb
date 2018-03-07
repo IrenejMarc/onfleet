@@ -5,6 +5,7 @@ module Onfleet
     include Onfleet::Actions::Create
     include Onfleet::Actions::Update
     include Onfleet::Actions::Delete
+    include Onfleet::Actions::Save
 
     def self.api_url
       '/teams'
