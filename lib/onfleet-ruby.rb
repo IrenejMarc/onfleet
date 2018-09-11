@@ -36,18 +36,20 @@ require 'onfleet-ruby/worker'
 require 'onfleet-ruby/webhook'
 
 
-module Onfleet
-  @base_url = "https://onfleet.com/api/v2"
+class Onfleet
+  BASE_URL = "https://onfleet.com/api/v2"
 
-  class << self
-    attr_accessor :api_key, :base_url, :encoded_api_key
+  attr_accessor :api_key, :encoded_api_key
+
+  def intitialize(api_key)
+    @api_key = api_key
   end
 
-  def self.request api_url, method, params={}
+  def request api_url, method, params={}
     raise AuthenticationError.new("Set your API Key using Onfleet.api_key = <API_KEY>") unless @api_key
 
     begin
-      response = RestClient::Request.execute(method: method, url: self.base_url+api_url, payload: params.to_json, headers: self.request_headers)
+      response = RestClient::Request.execute(method: method, url: BASE_URL+api_url, payload: params.to_json, headers: self.request_headers)
 
       if response != ''
         JSON.parse(response)
@@ -64,7 +66,7 @@ module Onfleet
   end
 
   private
-    def self.request_headers
+    def request_headers
       {
         Authorization: "Basic #{self.encoded_api_key}",
         content_type: :json,
@@ -72,11 +74,11 @@ module Onfleet
       }
     end
 
-    def self.encoded_api_key
+    def encoded_api_key
       @encoded_api_key ||= Base64.urlsafe_encode64(@api_key)
     end
 
-    def self.handle_api_error code, body
+    def handle_api_error code, body
       case code
       when 400, 404
         raise InvalidRequestError.new(body["message"])
@@ -87,7 +89,7 @@ module Onfleet
       end
     end
 
-    def self.handle_restclient_error e
+    def handle_restclient_error e
       case e
       when RestClient::RequestTimeout
         message = "Could not connect to Onfleet. Check your internet connection and try again."
